@@ -2,99 +2,115 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Animator))]
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float cellSize = 1f;
+
+    [Header("Animation Parameters")]
+    [SerializeField] private string moveXParam = "moveX";
+    [SerializeField] private string moveYParam = "moveY";
+    [SerializeField] private string isMovingParam = "isMoving";
 
     private bool _isMoving;
-    private Vector2Int _gridInput;
+    private Vector2 _input;
 
     private PlayerInputActions _actions;
-    private Transform _transform;
-    private Coroutine _moveCoroutine;
+    private Animator _animator;
+
+    // Cache dos hashes dos parâmetros do Animator (mais performático)
+    private int _moveXHash;
+    private int _moveYHash;
+    private int _isMovingHash;
 
     private void Awake()
     {
-        _transform = transform;
+        // Mapa de ações do Input System
         _actions = new PlayerInputActions();
+
+        // Referência ao Animator
+        _animator = GetComponent<Animator>();
+
+        // Cache dos hashes
+        _moveXHash = Animator.StringToHash(moveXParam);
+        _moveYHash = Animator.StringToHash(moveYParam);
+        _isMovingHash = Animator.StringToHash(isMovingParam);
     }
 
     private void OnEnable()
     {
         _actions.Enable();
-
-        // Inscreve nos eventos da action Move (Vector2)
-        _actions.Player.Move.performed += OnMovePerformed;
-        _actions.Player.Move.canceled  += OnMoveCanceled;
     }
 
     private void OnDisable()
     {
-        // Desinscreve para evitar leaks / múltiplos handlers
-        _actions.Player.Move.performed -= OnMovePerformed;
-        _actions.Player.Move.canceled  -= OnMoveCanceled;
-
         _actions.Disable();
     }
 
-    private void OnMovePerformed(InputAction.CallbackContext ctx)
+    private void Update()
     {
-        var rawInput = ctx.ReadValue<Vector2>();
+        // Se já está andando, só garante que o Animator sabe disso
+        if (_isMoving)
+        {
+            _animator.SetBool(_isMovingHash, true);
+            return;
+        }
 
-        // Arredonda para -1, 0 ou 1
-        _gridInput = new Vector2Int(
-            Mathf.RoundToInt(rawInput.x),
-            Mathf.RoundToInt(rawInput.y)
+        // Lê o valor da action Move (Vector2) do Input System
+        _input = _actions.Player.Move.ReadValue<Vector2>();
+
+        // Como é grid-based, arredondamos para -1, 0 ou 1
+        _input = new Vector2(
+            Mathf.RoundToInt(_input.x),
+            Mathf.RoundToInt(_input.y)
         );
 
-        // Remove diagonal (prioriza horizontal)
-        if (_gridInput.x != 0)
-            _gridInput.y = 0;
+        // Remove movimento em diagonal (prioriza horizontal)
+        if (_input.x != 0f)
+            _input.y = 0f;
 
-        // Se ainda não está se movendo, inicia a rotina de movimento
-        if (!_isMoving && _gridInput != Vector2Int.zero)
+        // Sem input: para animação de movimento
+        if (_input == Vector2.zero)
         {
-            _moveCoroutine = StartCoroutine(MoveRoutine());
+            _animator.SetBool(_isMovingHash, false);
+            return;
         }
+
+        // Atualiza direção no Animator (igual ao professor)
+        _animator.SetFloat(_moveXHash, _input.x);
+        _animator.SetFloat(_moveYHash, _input.y);
+
+        // Calcula a próxima célula do grid
+        var targetPos = transform.position;
+        targetPos.x += _input.x;
+        targetPos.y += _input.y;
+
+        // Inicia a coroutine de movimento até o próximo tile
+        StartCoroutine(Move(targetPos));
     }
 
-    private void OnMoveCanceled(InputAction.CallbackContext ctx)
-    {
-        // Quando solta o direcional, zera input.
-        // A coroutine atual termina o tile em andamento e depois para.
-        _gridInput = Vector2Int.zero;
-    }
-
-    private IEnumerator MoveRoutine()
+    private IEnumerator Move(Vector3 targetPos)
     {
         _isMoving = true;
+        _animator.SetBool(_isMovingHash, true);
 
-        // Enquanto houver input (tecla/direção pressionada), continua andando de tile em tile
-        while (_gridInput != Vector2Int.zero)
+        // Anda suavemente até chegar no alvo
+        while ((targetPos - transform.position).sqrMagnitude > Mathf.Epsilon)
         {
-            // Calcula o próximo alvo no grid
-            Vector3 startPos = _transform.position;
-            Vector3 targetPos = startPos + new Vector3(_gridInput.x, _gridInput.y) * cellSize;
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                targetPos,
+                moveSpeed * Time.deltaTime
+            );
 
-            // Anda suavemente até o target
-            while ((_transform.position - targetPos).sqrMagnitude > 0.0001f)
-            {
-                _transform.position = Vector3.MoveTowards(
-                    _transform.position,
-                    targetPos,
-                    moveSpeed * Time.deltaTime
-                );
-
-                yield return null;
-            }
-
-            // Garante que parou exatamente na célula
-            _transform.position = targetPos;
+            yield return null;
         }
 
+        // Garante que parou exatamente na posição alvo
+        transform.position = targetPos;
+
         _isMoving = false;
-        _moveCoroutine = null;
+        _animator.SetBool(_isMovingHash, false);
     }
 }
