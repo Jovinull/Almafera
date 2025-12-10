@@ -4,79 +4,97 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float cellSize = 1f;
 
     private bool _isMoving;
-    private Vector2 _input;
+    private Vector2Int _gridInput;
 
     private PlayerInputActions _actions;
+    private Transform _transform;
+    private Coroutine _moveCoroutine;
 
     private void Awake()
     {
-        // Cria a instância do mapa de ações
+        _transform = transform;
         _actions = new PlayerInputActions();
     }
 
     private void OnEnable()
     {
-        // Ativa todas as actions
         _actions.Enable();
+
+        // Inscreve nos eventos da action Move (Vector2)
+        _actions.Player.Move.performed += OnMovePerformed;
+        _actions.Player.Move.canceled  += OnMoveCanceled;
     }
 
     private void OnDisable()
     {
-        // Desativa quando o objeto for desabilitado
+        // Desinscreve para evitar leaks / múltiplos handlers
+        _actions.Player.Move.performed -= OnMovePerformed;
+        _actions.Player.Move.canceled  -= OnMoveCanceled;
+
         _actions.Disable();
     }
 
-    private void Update()
+    private void OnMovePerformed(InputAction.CallbackContext ctx)
     {
-        // Se já está andando, não lê novo input
-        if (_isMoving) return;
+        var rawInput = ctx.ReadValue<Vector2>();
 
-        // Lê o valor da action Move (Vector2)
-        _input = _actions.Player.Move.ReadValue<Vector2>();
-
-        // Como é grid-based, arredondamos para -1, 0 ou 1
-        _input = new Vector2(
-            Mathf.RoundToInt(_input.x),
-            Mathf.RoundToInt(_input.y)
+        // Arredonda para -1, 0 ou 1
+        _gridInput = new Vector2Int(
+            Mathf.RoundToInt(rawInput.x),
+            Mathf.RoundToInt(rawInput.y)
         );
 
-        // Remove movimento em diagonal (prioriza horizontal)
-        if (_input.x != 0f)
-            _input.y = 0f;
+        // Remove diagonal (prioriza horizontal)
+        if (_gridInput.x != 0)
+            _gridInput.y = 0;
 
-        // Se não tem input, não faz nada
-        if (_input == Vector2.zero) return;
-
-        // Calcula a próxima célula do grid
-        var targetPos = transform.position;
-        targetPos.x += _input.x;
-        targetPos.y += _input.y;
-
-        // Inicia a coroutine de movimento até o próximo tile
-        StartCoroutine(Move(targetPos));
+        // Se ainda não está se movendo, inicia a rotina de movimento
+        if (!_isMoving && _gridInput != Vector2Int.zero)
+        {
+            _moveCoroutine = StartCoroutine(MoveRoutine());
+        }
     }
 
-    private IEnumerator Move(Vector3 targetPos)
+    private void OnMoveCanceled(InputAction.CallbackContext ctx)
+    {
+        // Quando solta o direcional, zera input.
+        // A coroutine atual termina o tile em andamento e depois para.
+        _gridInput = Vector2Int.zero;
+    }
+
+    private IEnumerator MoveRoutine()
     {
         _isMoving = true;
 
-        // Anda suavemente até chegar no alvo
-        while ((targetPos - transform.position).sqrMagnitude > Mathf.Epsilon)
+        // Enquanto houver input (tecla/direção pressionada), continua andando de tile em tile
+        while (_gridInput != Vector2Int.zero)
         {
-            transform.position = Vector3.MoveTowards(
-                transform.position,
-                targetPos,
-                moveSpeed * Time.deltaTime
-            );
+            // Calcula o próximo alvo no grid
+            Vector3 startPos = _transform.position;
+            Vector3 targetPos = startPos + new Vector3(_gridInput.x, _gridInput.y) * cellSize;
 
-            yield return null;
+            // Anda suavemente até o target
+            while ((_transform.position - targetPos).sqrMagnitude > 0.0001f)
+            {
+                _transform.position = Vector3.MoveTowards(
+                    _transform.position,
+                    targetPos,
+                    moveSpeed * Time.deltaTime
+                );
+
+                yield return null;
+            }
+
+            // Garante que parou exatamente na célula
+            _transform.position = targetPos;
         }
 
-        // Garante que parou exatamente na posição alvo
-        transform.position = targetPos;
         _isMoving = false;
+        _moveCoroutine = null;
     }
 }
