@@ -12,6 +12,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask solidObjectsLayer;
     [SerializeField] private float collisionRadius = 0.3f;
 
+    [Header("Encounter")]
+    [SerializeField] private LayerMask grassLayer;
+    [SerializeField, Range(0f, 1f)]
+    [Tooltip("Chance de encontrar batalha ao pisar na grama (0–1).")]
+    private float encounterChance = 0.1f;
+    [SerializeField]
+    [Tooltip("Raio usado para detectar grama sob o jogador.")]
+    private float encounterCheckRadius = 0.2f;
+
     [Header("Animation Parameters")]
     [SerializeField] private string moveXParam = "moveX";
     [SerializeField] private string moveYParam = "moveY";
@@ -134,5 +143,30 @@ public class PlayerController : MonoBehaviour
 
         _isMoving = false;
         _animator.SetBool(_isMovingHash, false);
+
+        // Após terminar o movimento, verifica se houve encontro na grama
+        CheckForEncounters();
+    }
+
+    /// <summary>
+    /// Verifica se o player está sobre uma tile de grama e,
+    /// com base em uma chance, dispara um encontro aleatório.
+    /// </summary>
+    private void CheckForEncounters()
+    {
+        // Primeiro checa se há grama sob o jogador
+        var grassHit = Physics2D.OverlapCircle(transform.position, encounterCheckRadius, grassLayer);
+        if (grassHit == null)
+            return;
+
+        // Usa Random.value (0–1) para comparar com a chance configurada
+        if (Random.value <= encounterChance)
+        {
+            // Aqui você pluga o sistema de batalha / cena, etc.
+            Debug.Log("Encountered a wild pokemon");
+
+            // Exemplo para futuro:
+            // OnEncounter?.Invoke();
+        }
     }
 }
