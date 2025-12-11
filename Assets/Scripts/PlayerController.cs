@@ -8,6 +8,10 @@ public class PlayerController : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
 
+    [Header("Collision")]
+    [SerializeField] private LayerMask solidObjectsLayer;
+    [SerializeField] private float collisionRadius = 0.3f;
+
     [Header("Animation Parameters")]
     [SerializeField] private string moveXParam = "moveX";
     [SerializeField] private string moveYParam = "moveY";
@@ -86,8 +90,26 @@ public class PlayerController : MonoBehaviour
         targetPos.x += _input.x;
         targetPos.y += _input.y;
 
-        // Inicia a coroutine de movimento até o próximo tile
-        StartCoroutine(Move(targetPos));
+        // Só anda se a posição for caminhável (sem colisão)
+        if (IsWalkable(targetPos))
+        {
+            StartCoroutine(Move(targetPos));
+        }
+        else
+        {
+            // Se bateu em algo, garante que a animação de movimento pare
+            _animator.SetBool(_isMovingHash, false);
+        }
+    }
+
+    /// <summary>
+    /// Verifica se a próxima posição é caminhável usando um OverlapCircle 2D.
+    /// Retorna false se houver qualquer collider na layer de objetos sólidos.
+    /// </summary>
+    private bool IsWalkable(Vector3 targetPos)
+    {
+        var hit = Physics2D.OverlapCircle(targetPos, collisionRadius, solidObjectsLayer);
+        return hit == null;
     }
 
     private IEnumerator Move(Vector3 targetPos)
