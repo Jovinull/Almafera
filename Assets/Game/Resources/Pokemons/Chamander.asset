@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e9f1339dae2fbd49921ca2a14c413f2, type: 3}
+  m_Name: Chamander
+  m_EditorClassIdentifier: Assembly-CSharp::PokemonBase
+  pokemonName: Chamander
+  description: "Charmander is a small, bipedal Fire-type Pok\xE9mon and one of the
+    three first partner Pok\xE9mon offered to new Trainers in Kanto. The flame on
+    the tip of its tail has burned since birth and reflects its health and emotions,
+    glowing brightly when it is strong and flaring up when it is angry. Charmander
+    usually lives in hot, mountainous areas and often gathers in small groups, watching
+    over the flames on each other\u2019s tails."
+  frontSprite: {fileID: 21300000, guid: cd259d9d4f8ba2749a16d1cc64d46bec, type: 3}
+  backSprite: {fileID: 21300000, guid: ed8e1d9976a1fd94d961840d8f6e7764, type: 3}
+  type1: 2
+  type2: 0
+  maxHp: 39
+  attack: 52
+  defense: 43
+  spAttack: 60
+  spDefense: 50
+  speed: 65
