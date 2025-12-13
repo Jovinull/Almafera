@@ -1,6 +1,7 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Pokemon", menuName = "Pokemon/Create new pokemon")]
+[CreateAssetMenu(fileName = "Pokemon", menuName = "Pokemon/Create New Pokemon")]
 public class PokemonBase : ScriptableObject
 {
     [Header("Infos básicas")]
@@ -25,6 +26,8 @@ public class PokemonBase : ScriptableObject
     [SerializeField] private int spDefense;
     [SerializeField] private int speed;
 
+    [SerializeField] private List<LearnableMove> learnableMoves;
+
     public string Name => pokemonName;
     public string Description => description;
 
@@ -40,6 +43,18 @@ public class PokemonBase : ScriptableObject
     public int SpAttack => spAttack;
     public int SpDefense => spDefense;
     public int Speed => speed;
+
+    public List<LearnableMove> LearnableMoves => learnableMoves;
+}
+
+[System.Serializable]
+public class LearnableMove
+{
+    [SerializeField] private MoveBase moveBase;
+    [SerializeField] private int level;
+
+    public MoveBase Base => moveBase;
+    public int Level => level;
 }
 
 public enum PokemonType
@@ -59,5 +74,7 @@ public enum PokemonType
     Bug,
     Rock,
     Ghost,
-    Dragon
+    Dragon,
+    Steel,
+    Dark,
 }

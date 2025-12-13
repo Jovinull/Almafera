@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Pokemon
@@ -9,10 +10,25 @@ public class Pokemon
     {
         _pokemonBase = pBase;
         _level = pLevel;
+
+        HP = MaxHp;
+
+        Moves = new List<Move>();
+        foreach (var learnable in _pokemonBase.LearnableMoves)
+        {
+            if (learnable.Level <= _level)
+                Moves.Add(new Move(learnable.Base));
+
+            if (Moves.Count >= 4)
+                break;
+        }
     }
 
     public PokemonBase Base => _pokemonBase;
     public int Level => _level;
+
+    public int HP { get; set; }
+    public List<Move> Moves { get; set; }
 
     // Fórmulas de stats
     public int Attack =>

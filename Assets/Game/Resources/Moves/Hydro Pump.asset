@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aa7402348b36f44985ca5422e043bdb, type: 3}
+  m_Name: Hydro Pump
+  m_EditorClassIdentifier: Assembly-CSharp::MoveBase
+  nameMove: Hydro Pump
+  description: Hydro Pump is a high-powered Water-type special move that blasts the
+    target with a huge volume of water under great pressure, dealing heavy damage
+    but with lower accuracy (typically 80%), and it has no secondary effect.
+  type: 3
+  power: 110
+  accuracy: 80
+  pp: 5

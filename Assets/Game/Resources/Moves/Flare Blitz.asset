@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aa7402348b36f44985ca5422e043bdb, type: 3}
+  m_Name: Flare Blitz
+  m_EditorClassIdentifier: Assembly-CSharp::MoveBase
+  nameMove: Flare Blitz
+  description: Flare Blitz is a powerful Fire-type physical move where the user cloaks
+    itself in flames and charges the target, dealing massive damage but taking heavy
+    recoil, with a chance to burn.
+  type: 2
+  power: 120
+  accuracy: 100
+  pp: 15
