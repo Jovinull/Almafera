@@ -7,6 +7,7 @@ public class Pokemon
     {
         Base = pBase;
         Level = pLevel;
+
         HP = MaxHp;
 
         Moves = new List<Move>();
@@ -20,13 +21,12 @@ public class Pokemon
         }
     }
 
-    public PokemonBase Base { get; set; }
-    public int Level { get; set; }
+    public PokemonBase Base { get; private set; }
+    public int Level { get; private set; }
 
     public int HP { get; set; }
-    public List<Move> Moves { get; set; }
+    public List<Move> Moves { get; private set; }
 
-    // Fórmulas de stats
     public int Attack =>
         Mathf.FloorToInt((Base.Attack * Level) / 100f) + 5;
 
