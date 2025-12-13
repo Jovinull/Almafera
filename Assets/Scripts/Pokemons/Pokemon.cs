@@ -3,20 +3,16 @@ using UnityEngine;
 
 public class Pokemon
 {
-    private readonly PokemonBase _pokemonBase;
-    private readonly int _level;
-
     public Pokemon(PokemonBase pBase, int pLevel)
     {
-        _pokemonBase = pBase;
-        _level = pLevel;
-
+        Base = pBase;
+        Level = pLevel;
         HP = MaxHp;
 
         Moves = new List<Move>();
-        foreach (var learnable in _pokemonBase.LearnableMoves)
+        foreach (var learnable in Base.LearnableMoves)
         {
-            if (learnable.Level <= _level)
+            if (learnable.Level <= Level)
                 Moves.Add(new Move(learnable.Base));
 
             if (Moves.Count >= 4)
@@ -24,28 +20,28 @@ public class Pokemon
         }
     }
 
-    public PokemonBase Base => _pokemonBase;
-    public int Level => _level;
+    public PokemonBase Base { get; set; }
+    public int Level { get; set; }
 
     public int HP { get; set; }
     public List<Move> Moves { get; set; }
 
     // Fórmulas de stats
     public int Attack =>
-        Mathf.FloorToInt((_pokemonBase.Attack * _level) / 100f) + 5;
+        Mathf.FloorToInt((Base.Attack * Level) / 100f) + 5;
 
     public int Defense =>
-        Mathf.FloorToInt((_pokemonBase.Defense * _level) / 100f) + 5;
+        Mathf.FloorToInt((Base.Defense * Level) / 100f) + 5;
 
     public int SpAttack =>
-        Mathf.FloorToInt((_pokemonBase.SpAttack * _level) / 100f) + 5;
+        Mathf.FloorToInt((Base.SpAttack * Level) / 100f) + 5;
 
     public int SpDefense =>
-        Mathf.FloorToInt((_pokemonBase.SpDefense * _level) / 100f) + 5;
+        Mathf.FloorToInt((Base.SpDefense * Level) / 100f) + 5;
 
     public int Speed =>
-        Mathf.FloorToInt((_pokemonBase.Speed * _level) / 100f) + 5;
+        Mathf.FloorToInt((Base.Speed * Level) / 100f) + 5;
 
     public int MaxHp =>
-        Mathf.FloorToInt((_pokemonBase.MaxHp * _level) / 100f) + 10;
+        Mathf.FloorToInt((Base.MaxHp * Level) / 100f) + 10;
 }
